@@ -1,0 +1,81 @@
+<h2 mat-dialog-title>{{ editando ? 'Editar produto' : 'Novo produto' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+  <mat-dialog-content>
+    <div class="formulario">
+      <mat-form-field appearance="outline" class="largura-total">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="nome" maxlength="150" cdkFocusInitial />
+        @if (form.controls.nome.hasError('required')) {
+          <mat-error>O nome é obrigatório</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>SKU</mat-label>
+        <input matInput formControlName="sku" maxlength="50" style="text-transform: uppercase" />
+        <mat-hint>Código único do produto</mat-hint>
+        @if (form.controls.sku.hasError('required')) {
+          <mat-error>O SKU é obrigatório</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Categoria</mat-label>
+        <mat-select formControlName="categoriaId">
+          @for (categoria of categorias(); track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.categoriaId.hasError('required')) {
+          <mat-error>A categoria é obrigatória</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Preço (R$)</mat-label>
+        <input matInput type="number" inputmode="decimal" step="0.01" min="0" formControlName="preco" />
+        @if (form.controls.preco.hasError('required')) {
+          <mat-error>O preço é obrigatório</mat-error>
+        } @else if (form.controls.preco.hasError('min')) {
+          <mat-error>O preço não pode ser negativo</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estoque mínimo</mat-label>
+        <input matInput type="number" inputmode="numeric" step="1" min="0" formControlName="estoqueMinimo" />
+        <mat-hint>Abaixo disso o produto aparece como "estoque baixo"</mat-hint>
+        @if (form.controls.estoqueMinimo.hasError('required')) {
+          <mat-error>Informe o estoque mínimo</mat-error>
+        } @else if (form.controls.estoqueMinimo.hasError('min')) {
+          <mat-error>O estoque mínimo não pode ser negativo</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="largura-total">
+        <mat-label>Descrição</mat-label>
+        <textarea matInput formControlName="descricao" rows="3" maxlength="500"></textarea>
+      </mat-form-field>
+
+      @if (editando) {
+        <mat-slide-toggle formControlName="ativo" class="largura-total">Produto ativo</mat-slide-toggle>
+      }
+    </div>
+
+    @if (!editando) {
+      <p class="secundario">O saldo inicia em zero. Use "Movimentações" para registrar a primeira entrada.</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close [disabled]="salvando()">Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">
+      @if (salvando()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        Salvar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,47 @@
+# Uso:
+#   docker compose up -d                       -> apenas o PostgreSQL (para rodar a API e o front pelo IntelliJ)
+#   docker compose --profile completo up -d --build
+#                                              -> PostgreSQL + API + front (http://localhost:4200)
+services:
+  postgres:
+    image: postgres:16
+    container_name: estoque-postgres
+    environment:
+      POSTGRES_DB: estoque
+      POSTGRES_USER: estoque
+      POSTGRES_PASSWORD: estoque
+    ports:
+      - "5432:5432"
+    volumes:
+      - estoque-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U estoque -d estoque"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    profiles: ["completo"]
+    build: ./backend
+    container_name: estoque-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/estoque
+      DB_USER: estoque
+      DB_PASSWORD: estoque
+    ports:
+      - "8080:8080"
+
+  web:
+    profiles: ["completo"]
+    build: ./frontend
+    container_name: estoque-web
+    depends_on:
+      - api
+    ports:
+      - "4200:80"
+
+volumes:
+  estoque-data:

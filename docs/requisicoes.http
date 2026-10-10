@@ -1,0 +1,137 @@
+### Requisições de exemplo para o HTTP Client do IntelliJ (abra este arquivo e clique no ▶ ao lado de cada requisição).
+### Altere a porta abaixo se você mudou SERVER_PORT.
+@host = http://localhost:8080
+
+### ---------------------------------------------------------------
+### CATEGORIAS
+### ---------------------------------------------------------------
+
+### Listar com paginação e busca por nome
+GET {{host}}/api/categorias?busca=&pagina=0&tamanho=10&ordenarPor=nome&direcao=asc
+
+### Listar todas (sem paginação, para listas de seleção)
+GET {{host}}/api/categorias/todas
+
+### Buscar por id
+GET {{host}}/api/categorias/1
+
+### Cadastrar (guarda o id para as próximas requisições)
+POST {{host}}/api/categorias
+Content-Type: application/json
+
+{
+  "nome": "Congelados",
+  "descricao": "Alimentos congelados"
+}
+
+> {% client.global.set("categoriaId", response.body.id); %}
+
+### Atualizar
+PUT {{host}}/api/categorias/{{categoriaId}}
+Content-Type: application/json
+
+{
+  "nome": "Congelados e Resfriados",
+  "descricao": "Alimentos congelados e resfriados"
+}
+
+### Excluir (só funciona se a categoria não tiver produtos)
+DELETE {{host}}/api/categorias/{{categoriaId}}
+
+### ---------------------------------------------------------------
+### PRODUTOS
+### ---------------------------------------------------------------
+
+### Listar com paginação, ordenação e busca por nome ou SKU
+GET {{host}}/api/produtos?busca=arroz&pagina=0&tamanho=10&ordenarPor=preco&direcao=desc
+
+### Filtrar por categoria e situação (ativo=true|false)
+GET {{host}}/api/produtos?categoriaId=1&ativo=true
+
+### Produtos com estoque baixo
+GET {{host}}/api/produtos/estoque-baixo
+
+### Buscar por id
+GET {{host}}/api/produtos/1
+
+### Cadastrar (guarda o id)
+POST {{host}}/api/produtos
+Content-Type: application/json
+
+{
+  "nome": "Macarrão Espaguete Adria 500g",
+  "sku": "MER-900",
+  "descricao": "Pacote 500g",
+  "preco": 5.49,
+  "estoqueMinimo": 10,
+  "categoriaId": 2,
+  "ativo": true
+}
+
+> {% client.global.set("produtoId", response.body.id); %}
+
+### Atualizar
+PUT {{host}}/api/produtos/{{produtoId}}
+Content-Type: application/json
+
+{
+  "nome": "Macarrão Espaguete Adria 500g",
+  "sku": "MER-900",
+  "descricao": "Pacote 500g",
+  "preco": 5.99,
+  "estoqueMinimo": 12,
+  "categoriaId": 2,
+  "ativo": true
+}
+
+### Excluir (sem movimentações é removido; com movimentações é apenas desativado)
+DELETE {{host}}/api/produtos/{{produtoId}}
+
+### ---------------------------------------------------------------
+### MOVIMENTAÇÕES
+### ---------------------------------------------------------------
+
+### Listar (filtre por produto com produtoId)
+GET {{host}}/api/movimentacoes?produtoId=1&pagina=0&tamanho=10&ordenarPor=criadoEm&direcao=desc
+
+### Buscar por id
+GET {{host}}/api/movimentacoes/1
+
+### Registrar uma entrada
+POST {{host}}/api/movimentacoes
+Content-Type: application/json
+
+{
+  "produtoId": 1,
+  "tipo": "ENTRADA",
+  "quantidade": 50,
+  "observacao": "Compra do fornecedor"
+}
+
+### Registrar uma saída
+POST {{host}}/api/movimentacoes
+Content-Type: application/json
+
+{
+  "produtoId": 1,
+  "tipo": "SAIDA",
+  "quantidade": 10,
+  "observacao": "Venda"
+}
+
+### Saída maior que o saldo (deve retornar 422)
+POST {{host}}/api/movimentacoes
+Content-Type: application/json
+
+{
+  "produtoId": 1,
+  "tipo": "SAIDA",
+  "quantidade": 999999
+}
+
+### ---------------------------------------------------------------
+### PAINEL
+### ---------------------------------------------------------------
+
+### Indicadores gerais
+GET {{host}}/api/painel/resumo

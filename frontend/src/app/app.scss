@@ -1,0 +1,34 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.barra {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.marca {
+  font: var(--mat-sys-title-large);
+  color: inherit;
+
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+.container {
+  flex: 1 1 auto;
+}
+
+.menu {
+  width: 240px;
+  padding-top: 8px;
+}
+
+a.ativo {
+  background: var(--mat-sys-secondary-container);
+}

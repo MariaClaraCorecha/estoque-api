@@ -1,0 +1,141 @@
+<section class="pagina">
+  <header class="pagina-cabecalho">
+    <div>
+      <h1>Produtos</h1>
+      <p>Cadastre e acompanhe o saldo de cada item</p>
+    </div>
+    <button mat-flat-button type="button" (click)="novo()">
+      <mat-icon>add</mat-icon>
+      Novo produto
+    </button>
+  </header>
+
+  <div class="filtros">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Buscar por nome ou SKU</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="search" [formControl]="busca" autocomplete="off" />
+      @if (busca.value) {
+        <button mat-icon-button matSuffix type="button" aria-label="Limpar busca" (click)="limparBusca()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Categoria</mat-label>
+      <mat-select [formControl]="categoriaId">
+        <mat-option [value]="null">Todas</mat-option>
+        @for (categoria of categorias(); track categoria.id) {
+          <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Situação</mat-label>
+      <mat-select [formControl]="situacao">
+        <mat-option value="todos">Todos</mat-option>
+        <mat-option value="ativos">Ativos</mat-option>
+        <mat-option value="inativos">Inativos</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="tabela-container">
+    @if (carregando()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <table
+      mat-table
+      matSort
+      matSortActive="nome"
+      matSortDirection="asc"
+      matSortDisableClear
+      [dataSource]="produtos()"
+      (matSortChange)="ordenar($event)"
+    >
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
+        <td mat-cell *matCellDef="let p">{{ p.sku }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+        <td mat-cell *matCellDef="let p">{{ p.nome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="categoria">
+        <th mat-header-cell *matHeaderCellDef>Categoria</th>
+        <td mat-cell *matCellDef="let p">{{ p.categoria.nome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="preco">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="numero">Preço</th>
+        <td mat-cell *matCellDef="let p" class="numero">{{ p.preco | currency: 'BRL' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantidade">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="numero">Saldo</th>
+        <td mat-cell *matCellDef="let p" class="numero">
+          @if (p.estoqueBaixo && p.ativo) {
+            <span class="chip alerta" matTooltip="Mínimo: {{ p.estoqueMinimo }}">{{ p.quantidade | number }}</span>
+          } @else {
+            {{ p.quantidade | number }}
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="situacao">
+        <th mat-header-cell *matHeaderCellDef>Situação</th>
+        <td mat-cell *matCellDef="let p">
+          <span class="chip" [class.ok]="p.ativo" [class.inativo]="!p.ativo">
+            {{ p.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef class="acoes">Ações</th>
+        <td mat-cell *matCellDef="let p" class="acoes">
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Registrar entrada ou saída"
+            aria-label="Registrar movimentação"
+            [disabled]="!p.ativo"
+            (click)="movimentar(p)"
+          >
+            <mat-icon>swap_vert</mat-icon>
+          </button>
+          <button mat-icon-button type="button" matTooltip="Editar" aria-label="Editar produto" (click)="editar(p)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button type="button" matTooltip="Excluir" aria-label="Excluir produto" (click)="excluir(p)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+      <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
+    </table>
+
+    @if (!carregando() && produtos().length === 0) {
+      <div class="sem-resultados">
+        <mat-icon>inventory_2</mat-icon>
+        <p>Nenhum produto encontrado.</p>
+      </div>
+    }
+
+    <mat-paginator
+      [length]="total()"
+      [pageSize]="tamanho()"
+      [pageIndex]="pagina()"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      showFirstLastButtons
+      (page)="mudarPagina($event)"
+    />
+  </div>
+</section>

@@ -1,0 +1,144 @@
+<section class="pagina">
+  <header class="pagina-cabecalho">
+    <div>
+      <h1>Painel</h1>
+      <p>Visão geral do estoque</p>
+    </div>
+  </header>
+
+  @if (carregando()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (resumo(); as r) {
+    <div class="indicadores">
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <mat-icon>inventory_2</mat-icon>
+          <div>
+            <span class="valor">{{ r.totalProdutosAtivos | number }}</span>
+            <span class="rotulo">Produtos ativos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <mat-icon>category</mat-icon>
+          <div>
+            <span class="valor">{{ r.totalCategorias | number }}</span>
+            <span class="rotulo">Categorias</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <mat-icon>numbers</mat-icon>
+          <div>
+            <span class="valor">{{ r.totalItensEmEstoque | number }}</span>
+            <span class="rotulo">Unidades em estoque</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <mat-icon>payments</mat-icon>
+          <div>
+            <span class="valor">{{ r.valorTotalEmEstoque | currency: 'BRL' }}</span>
+            <span class="rotulo">Valor em estoque</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" [class.destaque-alerta]="r.produtosComEstoqueBaixo > 0">
+        <mat-card-content>
+          <mat-icon>warning</mat-icon>
+          <div>
+            <span class="valor">{{ r.produtosComEstoqueBaixo | number }}</span>
+            <span class="rotulo">Com estoque baixo</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="colunas">
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>Estoque baixo</mat-card-title>
+          <mat-card-subtitle>Produtos no estoque mínimo ou abaixo dele</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (estoqueBaixo().length === 0) {
+            <p class="vazio">Nenhum produto com estoque baixo.</p>
+          } @else {
+            <table mat-table [dataSource]="estoqueBaixo()">
+              <ng-container matColumnDef="produto">
+                <th mat-header-cell *matHeaderCellDef>Produto</th>
+                <td mat-cell *matCellDef="let p">
+                  {{ p.nome }}<br /><span class="secundario">{{ p.sku }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="quantidade">
+                <th mat-header-cell *matHeaderCellDef class="numero">Saldo</th>
+                <td mat-cell *matCellDef="let p" class="numero">
+                  <span class="chip alerta">{{ p.quantidade | number }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="minimo">
+                <th mat-header-cell *matHeaderCellDef class="numero">Mínimo</th>
+                <td mat-cell *matCellDef="let p" class="numero">{{ p.estoqueMinimo | number }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colunasEstoqueBaixo"></tr>
+              <tr mat-row *matRowDef="let linha; columns: colunasEstoqueBaixo"></tr>
+            </table>
+          }
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <a mat-button routerLink="/produtos">Ver produtos</a>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>Últimas movimentações</mat-card-title>
+          <mat-card-subtitle>As 5 mais recentes</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (r.ultimasMovimentacoes.length === 0) {
+            <p class="vazio">Nenhuma movimentação registrada.</p>
+          } @else {
+            <table mat-table [dataSource]="r.ultimasMovimentacoes">
+              <ng-container matColumnDef="data">
+                <th mat-header-cell *matHeaderCellDef>Data</th>
+                <td mat-cell *matCellDef="let m">{{ m.criadoEm | date: 'dd/MM HH:mm' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="produto">
+                <th mat-header-cell *matHeaderCellDef>Produto</th>
+                <td mat-cell *matCellDef="let m">{{ m.produtoNome }}</td>
+              </ng-container>
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                <td mat-cell *matCellDef="let m">
+                  <span class="chip" [class.entrada]="m.tipo === 'ENTRADA'" [class.saida]="m.tipo === 'SAIDA'">
+                    {{ rotuloTipo(m) }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="quantidade">
+                <th mat-header-cell *matHeaderCellDef class="numero">Qtd.</th>
+                <td mat-cell *matCellDef="let m" class="numero">{{ m.quantidade | number }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colunasMovimentacoes"></tr>
+              <tr mat-row *matRowDef="let linha; columns: colunasMovimentacoes"></tr>
+            </table>
+          }
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <a mat-button routerLink="/movimentacoes">Ver histórico</a>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  }
+</section>

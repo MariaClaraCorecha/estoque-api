@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>Registrar movimentação</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+  <mat-dialog-content>
+    <div class="formulario">
+      <div class="largura-total">
+        <app-produto-autocomplete [controle]="produto" [somenteAtivos]="true" />
+        @if (produtoEscolhido(); as p) {
+          <p class="secundario saldo">
+            Saldo atual: <strong>{{ p.quantidade | number }}</strong> · Mínimo: {{ p.estoqueMinimo | number }}
+          </p>
+        }
+      </div>
+
+      <div class="largura-total tipo">
+        <mat-button-toggle-group formControlName="tipo" aria-label="Tipo de movimentação" hideSingleSelectionIndicator>
+          <mat-button-toggle value="ENTRADA">Entrada</mat-button-toggle>
+          <mat-button-toggle value="SAIDA">Saída</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      <mat-form-field appearance="outline" class="largura-total">
+        <mat-label>Quantidade</mat-label>
+        <input matInput type="number" inputmode="numeric" step="1" min="1" formControlName="quantidade" />
+        @if (form.controls.quantidade.hasError('required')) {
+          <mat-error>Informe a quantidade</mat-error>
+        } @else if (form.controls.quantidade.hasError('min') || form.controls.quantidade.hasError('pattern')) {
+          <mat-error>A quantidade deve ser um número inteiro maior que zero</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="largura-total">
+        <mat-label>Observação</mat-label>
+        <textarea matInput formControlName="observacao" rows="2" maxlength="255" placeholder="Ex.: compra do fornecedor, venda, perda"></textarea>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close [disabled]="salvando()">Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">
+      @if (salvando()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        Registrar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

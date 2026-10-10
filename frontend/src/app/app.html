@@ -1,0 +1,26 @@
+<mat-toolbar color="primary" class="barra">
+  <button mat-icon-button type="button" aria-label="Abrir ou fechar o menu" (click)="menu.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <button mat-button type="button" class="marca" (click)="irParaInicio()">
+    <mat-icon>warehouse</mat-icon>
+    <span>Estoque</span>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="container">
+  <mat-sidenav #menu [mode]="modoMenu()" [opened]="!celular()" class="menu">
+    <mat-nav-list>
+      @for (item of itens; track item.rota) {
+        <a mat-list-item [routerLink]="item.rota" routerLinkActive="ativo" (click)="aoNavegar()">
+          <mat-icon matListItemIcon>{{ item.icone }}</mat-icon>
+          <span matListItemTitle>{{ item.rotulo }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>
